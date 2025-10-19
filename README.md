@@ -10,6 +10,8 @@
 
   Run `npm run dev` to start the frontend.
 
+  You'll probably receive a lot of security warnings when running this command, if you're on a mac, you can open your privacy and security settings, and manually override the warnings and say "open anyway" whenever prompted, and eventually it should let you run the app.
+
   Open up a second terminal window and navigate to the project folder and run `python app.py` to start the backend.
   
   
