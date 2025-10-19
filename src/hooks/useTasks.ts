@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Task, TaskFilters } from '../types/task';
 
-const STORAGE_KEY = 'personal-tasks';
-
 const defaultFilters: TaskFilters = {
   status: 'all',
   priority: 'all',
@@ -11,12 +9,17 @@ const defaultFilters: TaskFilters = {
   sortOrder: 'desc',
 };
 
-export function useTasks() {
+export function useTasks(currentUser?: string) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filters, setFilters] = useState<TaskFilters>(defaultFilters);
 
-  // Load tasks from localStorage on mount
+  // Dynamic storage key per user
+  const STORAGE_KEY = currentUser ? `personal-tasks_${currentUser}` : 'personal-tasks';
+
+  // Load tasks from localStorage on mount or when user changes
   useEffect(() => {
+    if (!currentUser) return; // nothing to load if no user
+
     const savedTasks = localStorage.getItem(STORAGE_KEY);
     if (savedTasks) {
       try {
@@ -24,13 +27,16 @@ export function useTasks() {
       } catch (error) {
         console.error('Failed to parse saved tasks:', error);
       }
+    } else {
+      setTasks([]); // no tasks yet for this user
     }
-  }, []);
+  }, [currentUser]);
 
   // Save tasks to localStorage whenever tasks change
   useEffect(() => {
+    if (!currentUser) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }, [tasks]);
+  }, [tasks, currentUser]);
 
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newTask: Task = {
