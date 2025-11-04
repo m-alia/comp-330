@@ -237,12 +237,28 @@ export function TaskItem({ task, onUpdate, onDelete, onToggleStatus }: TaskItemP
             </div>
 
             {task.dueDate && (
-              <div className={`flex items-center text-sm ${isOverdue ? 'text-red-600' : 'text-muted-foreground'}`}>
-                <Calendar className="h-3 w-3 mr-1" />
-                {formatDate(task.dueDate)}
-                {isOverdue && <span className="ml-1 font-medium">(Overdue)</span>}
-              </div>
-            )}
+  <div
+    className={`flex items-center text-sm ${
+      isOverdue ? "text-red-600" : "text-muted-foreground"
+    }`}
+  >
+    <Calendar className="h-3 w-3 mr-1" />
+
+    {/* Parse as local date to prevent off-by-one shift */}
+    {(() => {
+      const [year, month, day] = task.dueDate.split("-").map(Number);
+      const localDate = new Date(year, month - 1, day);
+      return localDate.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    })()}
+
+    {isOverdue && <span className="ml-1 font-medium">(Overdue)</span>}
+  </div>
+)}
+
           </div>
 
           <div className="text-xs text-muted-foreground mt-2">
