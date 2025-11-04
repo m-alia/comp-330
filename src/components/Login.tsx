@@ -31,13 +31,13 @@ export default function LoginPage({ setUser, onSwitchToSignUp }: LoginPageProps)
       if (res.ok) {
         localStorage.setItem("user", username);
         setUser(username);
-        toast.success("Logged in successfully!");
+        toast.success("Logged in successfully!", { closeButton: true });
         navigate("/");
       } else {
-        toast.error(data.error || "Login failed");
+        toast.error(data.error || "Login failed", { closeButton: true });
       }
     } catch {
-      toast.error("Network error");
+      toast.error("Network error", { closeButton: true });
     }
   };
 

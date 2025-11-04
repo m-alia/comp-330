@@ -31,13 +31,13 @@ export default function SignupPage({ setUser, onSwitchToLogin }: SignupPageProps
       if (res.ok) {
         localStorage.setItem("user", username);
         setUser(username);
-        toast.success("Account created successfully!");
+        toast.success("Account created successfully!", { closeButton: true });
         navigate("/");
       } else {
-        toast.error(data.error || "Signup failed");
+        toast.error(data.error || "Signup failed", { closeButton: true });
       }
     } catch {
-      toast.error("Network error");
+      toast.error("Network error", { closeButton: true });
     }
   };
 

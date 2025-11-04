@@ -12,22 +12,15 @@ import SignupPage from "./components/Signup";
 import "./index.css";
 import "./styles/globals.css";
 
+// Utility to parse a local YYYY-MM-DD date string to a Date object
+const parseLocalDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
 
 export default function App() {
   const [user, setUser] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<"login" | "signup">("login");
-
-  // Load logged-in user from localStorage on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(savedUser);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    toast("Logged out successfully");
-  };
 
   // Task logic
   const {
@@ -42,19 +35,52 @@ export default function App() {
     stats,
   } = useTasks(user || undefined);
 
+  // Load logged-in user from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) setUser(savedUser);
+  }, []);
+
+  // Show overdue/upcoming task notifications
+  useEffect(() => {
+    if (!user) return;
+
+    const now = new Date();
+
+    tasks.forEach((task) => {
+      if (task.dueDate && task.status !== "completed") {
+        const due = parseLocalDate(task.dueDate);
+        const diffMs = due.getTime() - now.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
+
+        if (diffHours < 0) {
+          toast.error(`Overdue: "${task.title}" was due on ${due.toLocaleDateString()}`, { closeButton: true });
+        } else if (diffHours <= 24) {
+          toast(`Upcoming: "${task.title}" is due on ${due.toLocaleDateString()}`, { closeButton: true });
+        }
+      }
+    });
+  }, [tasks, user]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    toast("Logged out successfully", { closeButton: true });
+  };
+
   const handleAddTask = (taskData: Parameters<typeof addTask>[0]) => {
     addTask(taskData);
-    toast.success("Task added successfully!");
+    toast.success("Task added successfully!", { closeButton: true });
   };
 
   const handleUpdateTask = (id: string, updates: Parameters<typeof updateTask>[1]) => {
     updateTask(id, updates);
-    toast.success("Task updated successfully!");
+    // Removed update toast to avoid excessive notifications
   };
 
   const handleDeleteTask = (id: string) => {
     deleteTask(id);
-    toast.success("Task deleted successfully!");
+    toast.success("Task deleted successfully!", { closeButton: true });
   };
 
   const handleToggleTask = (id: string) => {
@@ -64,8 +90,9 @@ export default function App() {
       const newStatus = task.status === "completed" ? "pending" : "completed";
       toast.success(
         newStatus === "completed"
-          ? "Task marked as completed!"
-          : "Task marked as pending!"
+          ? `Task "${task.title}" completed! 🎉`
+          : `Task "${task.title}" marked as pending`,
+        { closeButton: true }
       );
     }
   };
@@ -116,7 +143,6 @@ export default function App() {
           onDeleteTask={handleDeleteTask}
           onToggleTask={handleToggleTask}
         />
-        <Toaster />
       </div>
     </div>
   );
@@ -137,6 +163,9 @@ export default function App() {
 
   return (
     <Router>
+      {/* Toaster at top level */}
+      <Toaster position="top-right" />
+
       <Routes>
         <Route path="/" element={user ? <HomePage /> : <AuthPage />} />
         <Route path="*" element={<Navigate to="/" />} />
