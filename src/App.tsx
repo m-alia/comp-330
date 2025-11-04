@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTasks } from "./hooks/useTasks";
 import { TaskStats } from "./components/TaskStats";
 import { AddTaskForm } from "./components/AddTaskForm";
@@ -21,6 +21,7 @@ const parseLocalDate = (dateStr: string) => {
 export default function App() {
   const [user, setUser] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<"login" | "signup">("login");
+  const hasShownLoginToasts = useRef(false); // 👈 prevents repeated toasts
 
   // Task logic
   const {
@@ -41,11 +42,13 @@ export default function App() {
     if (savedUser) setUser(savedUser);
   }, []);
 
-  // Show overdue/upcoming task notifications
+  // Show overdue/upcoming task notifications only once after login
   useEffect(() => {
-    if (!user) return;
+    if (!user || hasShownLoginToasts.current) return;
+    if (tasks.length === 0) return;
 
     const now = new Date();
+    let showedToast = false;
 
     tasks.forEach((task) => {
       if (task.dueDate && task.status !== "completed") {
@@ -55,16 +58,21 @@ export default function App() {
 
         if (diffHours < 0) {
           toast.error(`Overdue: "${task.title}" was due on ${due.toLocaleDateString()}`, { closeButton: true });
+          showedToast = true;
         } else if (diffHours <= 24) {
           toast(`Upcoming: "${task.title}" is due on ${due.toLocaleDateString()}`, { closeButton: true });
+          showedToast = true;
         }
       }
     });
-  }, [tasks, user]);
+
+    if (showedToast) hasShownLoginToasts.current = true; // 👈 mark as shown
+  }, [user, tasks]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
+    hasShownLoginToasts.current = false; // 👈 reset so it shows next login
     toast("Logged out successfully", { closeButton: true });
   };
 
@@ -75,7 +83,7 @@ export default function App() {
 
   const handleUpdateTask = (id: string, updates: Parameters<typeof updateTask>[1]) => {
     updateTask(id, updates);
-    // Removed update toast to avoid excessive notifications
+    toast.success("Task updated successfully!", { closeButton: true });
   };
 
   const handleDeleteTask = (id: string) => {
