@@ -7,11 +7,15 @@ import { TaskFilters } from "./components/TaskFilters";
 import { TaskList } from "./components/TaskList";
 import { Toaster, toast } from "sonner";
 import { CheckSquare } from "lucide-react";
-import Login from "./Login";
-import Signup from "./Signup";
+import LoginPage from "./components/Login";
+import SignupPage from "./components/Signup";
+import "./index.css";
+import "./styles/globals.css";
+
 
 export default function App() {
   const [user, setUser] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<"login" | "signup">("login");
 
   // Load logged-in user from localStorage on mount
   useEffect(() => {
@@ -25,7 +29,7 @@ export default function App() {
     toast("Logged out successfully");
   };
 
-  // Pass the current user to useTasks so tasks are user-specific
+  // Task logic
   const {
     tasks,
     filters,
@@ -38,7 +42,6 @@ export default function App() {
     stats,
   } = useTasks(user || undefined);
 
-  // Task handlers with toast notifications
   const handleAddTask = (taskData: Parameters<typeof addTask>[0]) => {
     addTask(taskData);
     toast.success("Task added successfully!");
@@ -67,11 +70,10 @@ export default function App() {
     }
   };
 
-  // Home page component
+  // Home page
   const HomePage = () => (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-primary text-primary-foreground rounded-lg">
@@ -80,7 +82,7 @@ export default function App() {
             <div>
               <h1 className="text-3xl font-bold">Personal Task Tracker</h1>
               <p className="text-muted-foreground">
-                Welcome, {user}! Organize and manage your tasks efficiently
+                Welcome, {user}! Organize and manage your tasks efficiently.
               </p>
             </div>
           </div>
@@ -119,18 +121,25 @@ export default function App() {
     </div>
   );
 
+  // Auth page toggle
+  const AuthPage = () =>
+    currentPage === "login" ? (
+      <LoginPage
+        setUser={setUser}
+        onSwitchToSignUp={() => setCurrentPage("signup")}
+      />
+    ) : (
+      <SignupPage
+        setUser={setUser}
+        onSwitchToLogin={() => setCurrentPage("login")}
+      />
+    );
+
   return (
     <Router>
       <Routes>
-        {/* Home page redirects to login if not logged in */}
-        <Route path="/" element={user ? <HomePage /> : <Navigate to="/login" />} />
-
-        {/* Login/Signup routes */}
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/signup" element={<Signup setUser={setUser} />} />
-
-        {/* Catch-all redirects to home or login */}
-        <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+        <Route path="/" element={user ? <HomePage /> : <AuthPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
