@@ -43,31 +43,47 @@ export default function App() {
   }, []);
 
   // Show overdue/upcoming task notifications only once after login
-  useEffect(() => {
-    if (!user || hasShownLoginToasts.current) return;
-    if (tasks.length === 0) return;
+// Show overdue/upcoming task notifications only once after initial full load
+useEffect(() => {
+  if (!user) return;
 
-    const now = new Date();
-    let showedToast = false;
+  // Track whether we've already run toasts this session
+  const hasLoadedBefore = hasShownLoginToasts.current;
 
-    tasks.forEach((task) => {
-      if (task.dueDate && task.status !== "completed") {
-        const due = parseLocalDate(task.dueDate);
-        const diffMs = due.getTime() - now.getTime();
-        const diffHours = diffMs / (1000 * 60 * 60);
+  // If we’ve already shown notifications once, skip
+  if (hasLoadedBefore) return;
 
-        if (diffHours < 0) {
-          toast.error(`Overdue: "${task.title}" was due on ${due.toLocaleDateString()}`, { closeButton: true });
-          showedToast = true;
-        } else if (diffHours <= 24) {
-          toast(`Upcoming: "${task.title}" is due on ${due.toLocaleDateString()}`, { closeButton: true });
-          showedToast = true;
-        }
+  // Only show notifications once *after* tasks are initially loaded
+  if (tasks.length === 0) return;
+
+  // Detect if tasks were just freshly loaded (not immediately after editing)
+  const allTasksHaveIDs = tasks.every((t) => t.id);
+  if (!allTasksHaveIDs) return;
+
+  const now = new Date();
+  let hasAnyNotification = false;
+
+  tasks.forEach((task) => {
+    if (task.dueDate && task.status !== "completed") {
+      const due = parseLocalDate(task.dueDate);
+      const diffMs = due.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+
+      if (diffHours < 0) {
+        toast.error(`Overdue: "${task.title}" was due on ${due.toLocaleDateString()}`, { closeButton: true });
+        hasAnyNotification = true;
+      } else if (diffHours <= 24) {
+        toast(`Upcoming: "${task.title}" is due on ${due.toLocaleDateString()}`, { closeButton: true });
+        hasAnyNotification = true;
       }
-    });
+    }
+  });
 
-    if (showedToast) hasShownLoginToasts.current = true; // 👈 mark as shown
-  }, [user, tasks]);
+  // Mark as shown whether or not a toast actually fired,
+  // so future edits or new tasks don’t retrigger notifications
+  hasShownLoginToasts.current = true;
+}, [user, tasks]);
+
 
   const handleLogout = () => {
     localStorage.removeItem("user");
