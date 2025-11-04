@@ -6,9 +6,16 @@
 
   Run `npm i` to install the dependencies.
 
+  If you receive a message similar to `command not found: npm`, you may need to install npm and Node.js.
+  Instructions for installation can be found here: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+
   After downloading the repo, navigate to the project folder and use `python setup_db.py`
 
   Run `npm run dev` to start the frontend.
+
+  You'll probably receive a lot of security warnings when running this command, if you're on a mac, you can open your privacy and security settings, and manually override the warnings and say "open anyway" whenever prompted, and eventually it should let you run the app.
+
+  If on Windows, you can temporarily disable your app screening. First, open your settings, and navigate to the "Privacy & Security" tab, and then open "Windows Security." Next, open "App & Browser Control" and go to "Reputation-Based Protection Settings." From there, you can temporarily disable "Check apps and files."
 
   Open up a second terminal window and navigate to the project folder and run `python app.py` to start the backend.
   
