@@ -6,8 +6,8 @@
 
   Run `npm i` to install the dependencies.
 
-  If you receive a message similar to `command not found: npm`, you may need to install npm and Node.js
-  Instructions for instillation can be found here: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+  If you receive a message similar to `command not found: npm`, you may need to install npm and Node.js.
+  Instructions for installation can be found here: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
   After downloading the repo, navigate to the project folder and use `python setup_db.py`
 
