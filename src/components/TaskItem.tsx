@@ -5,6 +5,8 @@ import { Badge } from './ui/badge';
 import { Checkbox } from './ui/checkbox';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import { Play, Square } from 'lucide-react';
+import { useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { 
   MoreHorizontal, 
@@ -31,9 +33,12 @@ interface TaskItemProps {
   onUpdate: (id: string, updates: Partial<Task>) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (id: string) => void;
+  onStartTimer: (taskId: string) => void;
+  onStopTimer: (taskId: string) => void;
+
 }
 
-export function TaskItem({ task, onUpdate, onDelete, onToggleStatus }: TaskItemProps) {
+export function TaskItem({ task, onUpdate, onDelete, onToggleStatus, onStartTimer, onStopTimer }: TaskItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     title: task.title,
@@ -43,6 +48,19 @@ export function TaskItem({ task, onUpdate, onDelete, onToggleStatus }: TaskItemP
     dueDate: task.dueDate || '',
     status: task.status,
   });
+  const [liveTime, setLiveTime] = useState(task.timeSpent || 0);
+
+  useEffect(() => {
+  if (!task.isTimerRunning) return;
+
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - (task.timerStartAt || Date.now());
+    setLiveTime((task.timeSpent || 0) + elapsed);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [task.isTimerRunning, task.timerStartAt, task.timeSpent]);
+
 
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
   const isCompleted = task.status === 'completed';
@@ -75,6 +93,18 @@ export function TaskItem({ task, onUpdate, onDelete, onToggleStatus }: TaskItemP
       year: 'numeric',
     });
   };
+
+  const formatTime = (ms?: number) => {
+  if (!ms) return '0:00';
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return hours > 0
+    ? `${hours}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`
+    : `${minutes}:${seconds.toString().padStart(2,'0')}`;
+};
+
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -235,6 +265,18 @@ export function TaskItem({ task, onUpdate, onDelete, onToggleStatus }: TaskItemP
                 </Badge>
               )}
             </div>
+                      <div className="flex items-center space-x-2 ml-auto">
+            {task.isTimerRunning ? (
+              <Button size="sm" variant="outline" onClick={() => onStopTimer(task.id)}>
+                <Square className="h-3 w-3 mr-1" /> Stop
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" onClick={() => onStartTimer(task.id)}>
+                <Play className="h-3 w-3 mr-1" /> Start
+              </Button>
+            )}
+            <span className="ml-2 text-sm">{formatTime(liveTime)}</span>
+          </div>
 
             {task.dueDate && (
   <div

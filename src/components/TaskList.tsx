@@ -7,9 +7,11 @@ interface TaskListProps {
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
   onDeleteTask: (id: string) => void;
   onToggleTask: (id: string) => void;
+  onStartTimer: (taskId: string) => void;  // ⬅ Add this
+  onStopTimer: (taskId: string) => void;   // ⬅ Add this
 }
 
-export function TaskList({ tasks, onUpdateTask, onDeleteTask, onToggleTask }: TaskListProps) {
+export function TaskList({ tasks, onUpdateTask, onDeleteTask, onToggleTask, onStartTimer, onStopTimer }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12">
@@ -35,6 +37,8 @@ export function TaskList({ tasks, onUpdateTask, onDeleteTask, onToggleTask }: Ta
           onUpdate={onUpdateTask}
           onDelete={onDeleteTask}
           onToggleStatus={onToggleTask}
+          onStartTimer={onStartTimer}   // pass down
+          onStopTimer={onStopTimer}     // pass down
         />
       ))}
     </div>
