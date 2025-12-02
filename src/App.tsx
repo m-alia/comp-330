@@ -35,6 +35,8 @@ export default function App() {
     toggleTaskStatus,
     startTimer,
     stopTimer,
+    startTimer,
+    stopTimer,
     categories,
     stats,
   } = useTasks(user || undefined);
@@ -104,9 +106,6 @@ useEffect(() => {
     updateTask(id, updates);
     toast.success("Task updated successfully!", { closeButton: true });
   };
-
-  const handleStartTimer = (taskId: string) => startTimer(taskId);
-  const handleStopTimer = (taskId: string) => stopTimer(taskId);
 
   const handleDeleteTask = (id: string) => {
     deleteTask(id);

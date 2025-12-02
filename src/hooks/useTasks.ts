@@ -62,6 +62,32 @@ export function useTasks(currentUser?: string) {
     setTasks(prev => prev.filter(task => task.id !== id));
   };
 
+const startTimer = (taskId: string) => {
+  setTasks(prev =>
+    prev.map(task =>
+      task.id === taskId
+        ? { ...task, isTimerRunning: true, timerStartAt: Date.now() }
+        : task
+    )
+  );
+};
+
+const stopTimer = (taskId: string) => {
+  setTasks(prev =>
+    prev.map(task => {
+      if (task.id !== taskId || !task.timerStartAt) return task;
+      const elapsed = Date.now() - task.timerStartAt;
+      return {
+        ...task,
+        isTimerRunning: false,
+        timerStartAt: undefined,
+        timeSpent: (task.timeSpent || 0) + elapsed,
+      };
+    })
+  );
+};
+
+
   const toggleTaskStatus = (id: string) => {
     setTasks(prev =>
       prev.map(task => {
@@ -136,6 +162,8 @@ export function useTasks(currentUser?: string) {
     updateTask,
     deleteTask,
     toggleTaskStatus,
+    startTimer,
+    stopTimer,
     categories,
     stats,
   };

@@ -8,6 +8,11 @@ export interface Task {
   dueDate?: string;
   createdAt: string;
   updatedAt: string;
+
+  // Timer fields
+  isTimerRunning?: boolean;
+  timerStartAt?: number; // timestamp in ms
+  timeSpent?: number; // total milliseconds
 }
 
 export interface TaskFilters {
