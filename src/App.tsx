@@ -35,8 +35,6 @@ export default function App() {
     toggleTaskStatus,
     startTimer,
     stopTimer,
-    startTimer,
-    stopTimer,
     categories,
     stats,
   } = useTasks(user || undefined);
