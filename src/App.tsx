@@ -7,6 +7,7 @@ import { TaskFilters } from "./components/TaskFilters";
 import { TaskList } from "./components/TaskList";
 import { Toaster, toast } from "sonner";
 import { CheckSquare } from "lucide-react";
+import { TaskStatusChart } from "./components/TaskStatusChart";
 import LoginPage from "./components/Login";
 import SignupPage from "./components/Signup";
 import "./index.css";
@@ -32,6 +33,8 @@ export default function App() {
     updateTask,
     deleteTask,
     toggleTaskStatus,
+    startTimer,
+    stopTimer,
     categories,
     stats,
   } = useTasks(user || undefined);
@@ -102,6 +105,9 @@ useEffect(() => {
     toast.success("Task updated successfully!", { closeButton: true });
   };
 
+  const handleStartTimer = (taskId: string) => startTimer(taskId);
+  const handleStopTimer = (taskId: string) => stopTimer(taskId);
+
   const handleDeleteTask = (id: string) => {
     deleteTask(id);
     toast.success("Task deleted successfully!", { closeButton: true });
@@ -154,6 +160,14 @@ useEffect(() => {
 
         {/* Task UI */}
         <TaskStats stats={stats} />
+        
+        {/* Pie Chart Section - Added below TaskStats */}
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+             <TaskStatusChart tasks={tasks} />
+          </div>
+        </div>
+
         <AddTaskForm onAddTask={handleAddTask} categories={categories} />
         <TaskFilters
           filters={filters}
@@ -166,6 +180,8 @@ useEffect(() => {
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
           onToggleTask={handleToggleTask}
+          onStartTimer={handleStartTimer}
+          onStopTimer={handleStopTimer}
         />
       </div>
     </div>
